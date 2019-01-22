@@ -1,0 +1,7 @@
+#!/usr/bin/env perl
+use 5.20.0;
+use lib '/cyrusworks/source/Scripts/lib/';
+use CyrusWorks::Pragmas;
+use CyrusWorks::Remove;
+
+CyrusWorks::Remove->new->remove_old_containers;
