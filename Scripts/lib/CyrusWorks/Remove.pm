@@ -3,6 +3,7 @@ use 5.20.0;
 use Moo;
 use CyrusWorks::Pragmas;
 use JSON;
+use LockFile::Simple qw{ lock };
 
 sub get_containers_json($self) {
   my $output = `docker ps -a --format='{ "id" : {{json .ID}}, "image" : {{json .Image}}, "command" : {{json .Command}}, "status" : {{json .Status}} }'`;
@@ -30,11 +31,13 @@ sub get_relevant_containers($self) {
 }
 
 sub remove_old_containers($self) {
+  lock('/run/remove_old_containers.lock') || die 'Could not get lock';
   my $containers_to_remove = $self->get_relevant_containers;
   foreach my $container ( $containers_to_remove->@* ) {
     say join( ' ', 'Removing container', $container->{id}, $container->{image} );
     system( '/usr/bin/docker', 'rm', $container->{id} );
   }
+  unlock('/run/remove_old_containers.lock');
 }
 
 1;
